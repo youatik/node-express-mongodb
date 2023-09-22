@@ -1,14 +1,17 @@
+//app.js
 const express = require('express');
-const { MongoClient } = require('mongodb'); // Import MongoClient from the mongodb package
-const exphbs = require('express-handlebars'); // Import express-handlebars
-
+const { MongoClient } = require('mongodb'); // Import pour MongoClient du package mongodb
+const exphbs = require('express-handlebars'); // Import pour express-handlebars
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// MongoDB connection setup (replace with your database connection URI)
+// connection vers MongoDB  (remplacer le connection string local port 27017)
 const uri = 'mongodb://localhost:27017';
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Middleware necessaire pour faire le parsing du "request body"
+app.use(express.urlencoded({ extended: true }));
 
 app.engine('hbs', exphbs.engine({ extname: 'hbs' }));
 app.set('view engine', 'hbs');
@@ -24,7 +27,14 @@ client.connect()
 // Middleware
 app.use(express.json());
 
-// Route to retrieve the first 10 documents
+//route par default
+app.get('/', (req, res) => {
+    res.render('home');
+});
+
+
+
+// Route pour chercher les 10 permiers documents
 app.get('/books-catalog', async (req, res) => {
     try {
         const db = client.db('A17');
@@ -46,39 +56,106 @@ app.get('/books-catalog', async (req, res) => {
             .limit(10)
             .toArray();
 
-        res.render('book-catalog', { books }); // Assumes you have a 'book-catalog.hbs' view template
+        res.render('book-catalog', { books }); // va vers la page 'book-catalog.hbs' comme view template
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
+// Route to display the Edit Book form with populated data
+app.get('/edit-book/:isbn', async (req, res) => {
+    // This block will handle /edit-book/9780070570641
+    handleBookEdit(req, res, req.params.isbn);
+});
 
+app.get('/edit-book/', async (req, res) => {
+    // This block will handle /edit-book/?isbn=9780070570641
+    if (!req.query.isbn) {
+        res.status(400).send('ISBN not provided');
+        return;
+    }
+    handleBookEdit(req, res, req.query.isbn);
+});
 
-
-
-
-
-// Route to retrieve the first 10 documents based on the "year" field
-app.get('/books', async (req, res) => {
+async function handleBookEdit(req, res, isbn) {
     try {
         const db = client.db('A17');
-        const collection = db.collection('Livres');
+        const collection = db.collection('Books');
 
-        // Retrieve articles with "title" and "type" (genre) fields
-        const books = await collection.find({ type: 'Article' })
-            .project({ _id: 0, title: 1, type: 1 }) // Include only "title" and "type"
-            .sort({ year: 1 })
-            .limit(10)
-            .toArray();
+        // Find the book by ISBN (assuming ISBN is unique)
+        const book = await collection.findOne({ ean_isbn13: Number(isbn) });
 
-        // Render the 'books' view and pass the 'books' data to the template
-        res.render('books', { books });
+        //test
+        console.log(`Looking for book with ISBN: ${isbn}`);
+        const booktest = await collection.findOne({ ean_isbn13: Number(isbn) });
+        console.log(booktest);
+
+        if (!book) {
+            res.status(404).send(`ISBN ${isbn} not found`);
+            return;
+        }
+
+        res.render('edit-book', { book });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+
+
+// Route to update book data
+app.post('/update-book', async (req, res) => {
+    try {
+        //logging for debug entry into the code of this post
+        console.log('Enter /update-book route');
+        console.log('Request body:', req.body);
+
+        const db = client.db('A17');
+        const collection = db.collection('Books');
+
+        // Get updated book data from the form submission
+        const updatedBookData = {
+            title: req.body.title,
+            creators: req.body.creators,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            description: req.body.description,
+            publisher: req.body.publisher,
+            publishDate: req.body.publishDate,
+            price: parseFloat(req.body.price),
+            length: parseInt(req.body.length, 10),
+        };
+
+        // Update the book in the database based on ISBN
+        const isbn = req.body.isbn;
+        await collection.updateOne({ ean_isbn13: Number(isbn) }, { $set: updatedBookData });
+
+        res.redirect('/books-catalog'); // Redirect to the book catalog after updating
+
+        //logging for debug exit from the code of this post
+        console.log('Exit /update-book route');
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
+
+
+
+
+
+
+
+// Route to display the Edit ISBN form
+app.get('/edit-isbn', (req, res) => {
+    res.render('edit-isbn');
+});
+
+
 
 
 

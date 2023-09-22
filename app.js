@@ -20,6 +20,8 @@ app.set('view engine', 'hbs');
 // Middleware pour le JSON
 app.use(express.json());
 
+
+
 //route par default
 app.get('/', (req, res) => {
     res.render('home');
@@ -68,6 +70,8 @@ app.get('/edit-book/', async (req, res) => {
     }
     handleBookEdit(req, res, req.query.isbn);
 });
+
+
 
 async function handleBookEdit(req, res, isbn) {
     try {
@@ -134,8 +138,73 @@ app.post('/update-book', async (req, res) => {
 });
 
 
+// Serve the 'delete-isbn' view
+app.get('/delete-isbn', (req, res) => {
+    res.render('delete-isbn');
+});
+
+app.post('/delete-book', async (req, res) => {
+    try {
+        const db = getDb('A17');
+        const collection = db.collection('Books');
+
+        const isbn = req.body.isbn;
+        await collection.deleteOne({ ean_isbn13: Number(isbn) });
+
+        res.redirect('/books-catalog');  // Redirect to the book catalog after deletion
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
+app.get('/create-book', (req, res) => {
+    res.render('create-book'); // Render the 'create-book.hbs' view when this endpoint is accessed
+});
+
+app.post('/create-book', async (req, res) => {
+    try {
+        console.log('Enter /create-book route');
+        console.log('Request body:', req.body);
+
+        const db = getDb('A17');
+        const collection = db.collection('Books');
+
+        // Get book data from the form submission
+        const newBookData = {
+            ean_isbn13: Number(req.body.isbn),
+            title: req.body.title,
+            creators: req.body.creators,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            description: req.body.description,
+            publisher: req.body.publisher,
+            publishDate: req.body.publishDate,
+            price: parseFloat(req.body.price),
+            length: parseInt(req.body.length, 10),
+        };
+
+        // Check if ISBN already exists
+        const existingBook = await collection.findOne({ ean_isbn13: newBookData.ean_isbn13 });
+
+        if (existingBook) {
+            // If the book with the given ISBN already exists, redirect with an error message (or handle as desired)
+            res.redirect('/create-book?error=ISBN already exists');
+        } else {
+            // Insert the new book data into the database
+            await collection.insertOne(newBookData);
+
+            res.redirect('/books-catalog'); // Redirect to the book catalog after inserting
+        }
+
+        console.log('Exit /create-book route');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 

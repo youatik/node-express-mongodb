@@ -1,30 +1,23 @@
 //app.js
 const express = require('express');
-const { MongoClient } = require('mongodb'); // Import pour MongoClient du package mongodb
+//const { MongoClient } = require('mongodb'); // Import pour MongoClient du package mongodb
 const exphbs = require('express-handlebars'); // Import pour express-handlebars
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// connection vers MongoDB  (remplacer le connection string local port 27017)
-const uri = 'mongodb://localhost:27017';
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const { connect, getDb } = require('./database/db'); // Importing the database utilities
+connect();
+
 
 // Middleware necessaire pour faire le parsing du "request body"
 app.use(express.urlencoded({ extended: true }));
 
+//Engin de vues Express Handlebars
 app.engine('hbs', exphbs.engine({ extname: 'hbs' }));
 app.set('view engine', 'hbs');
 
-client.connect()
-    .then(() => {
-        console.log('Connected to MongoDB');
-    })
-    .catch((error) => {
-        console.error('MongoDB connection error:', error);
-    });
-
-// Middleware
+// Middleware pour le JSON
 app.use(express.json());
 
 //route par default
@@ -32,12 +25,10 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-
-
 // Route pour chercher les 10 permiers documents
 app.get('/books-catalog', async (req, res) => {
     try {
-        const db = client.db('A17');
+        const db = getDb('A17');
         const collection = db.collection('Books');
 
         // Adjust this query according to your needs:
@@ -80,7 +71,7 @@ app.get('/edit-book/', async (req, res) => {
 
 async function handleBookEdit(req, res, isbn) {
     try {
-        const db = client.db('A17');
+        const db = getDb('A17');
         const collection = db.collection('Books');
 
         // Find the book by ISBN (assuming ISBN is unique)
@@ -112,7 +103,7 @@ app.post('/update-book', async (req, res) => {
         console.log('Enter /update-book route');
         console.log('Request body:', req.body);
 
-        const db = client.db('A17');
+        const db = getDb('A17');
         const collection = db.collection('Books');
 
         // Get updated book data from the form submission

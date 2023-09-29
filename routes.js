@@ -2,6 +2,14 @@
 //ce fichier contient les routes et leurs controleurs menant aux vues et aux actions
 const { connect, getDb } = require('./database/db'); // Importer la BD
 
+const axios = require('axios'); // Make sure to install this package.
+const PROXY_PORT = 5002
+const PROXY_API_URL = `http://localhost:${PROXY_PORT}`; // replace [PROXY_PORT] with the actual proxy port from your config.
+
+
+
+
+
 module.exports = (app) => {
 
 //route par default
@@ -12,31 +20,23 @@ module.exports = (app) => {
 // Route pour chercher les 250 permiers documents
     app.get('/books-catalog', async (req, res) => {
         try {
-            const db = getDb('A17');
-            const collection = db.collection('Books');
+            // Request books data from Flask Proxy API
+            const response = await axios.get(`${PROXY_API_URL}/books`, {
+                headers: {
+                    // Add additional headers here if needed
+                }
+            });
 
-            // Recherche sur MongoDB:
-            const books = await collection.find({})
-                .project({
-                    _id: 0,
-                    ean_isbn13: 1,
-                    title: 1,
-                    creators: 1,
-                    description: 1,
-                    publisher: 1,
-                    publishDate: 1,
-                    price: 1,
-                    length: 1
-                })
-                .limit(250)
-                .toArray();
+            // Expecting that response data contains books array directly
+            const books = response.data;
 
-            res.render('book-catalog', { books }); // va vers la page 'book-catalog.hbs' comme view template
+            res.render('book-catalog', { books });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });
+
 
 // Route pour le 'Edit Book' dont le formulaire contient les infos à éditer
     app.get('/edit-book/:isbn', async (req, res) => {

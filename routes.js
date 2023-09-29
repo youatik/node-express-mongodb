@@ -1,5 +1,5 @@
 //routes.js
-
+//ce fichier contient les routes et leurs controleurs menant aux vues et aux actions
 const { connect, getDb } = require('./database/db'); // Importer la BD
 
 module.exports = (app) => {
@@ -15,7 +15,7 @@ module.exports = (app) => {
             const db = getDb('A17');
             const collection = db.collection('Books');
 
-            // Adjust this query according to your needs:
+            // Recherche sur MongoDB:
             const books = await collection.find({})
                 .project({
                     _id: 0,
@@ -38,14 +38,14 @@ module.exports = (app) => {
         }
     });
 
-// Route to display the Edit Book form with populated data
+// Route pour le 'Edit Book' dont le formulaire contient les infos à éditer
     app.get('/edit-book/:isbn', async (req, res) => {
         // This block will handle /edit-book/9780070570641
         handleBookEdit(req, res, req.params.isbn);
     });
 
     app.get('/edit-book/', async (req, res) => {
-        // This block will handle /edit-book/?isbn=9780070570641
+        // Ce bloc permet de gérer la route /edit-book/?isbn=9780070570641 etc...
         if (!req.query.isbn) {
             res.status(400).send('ISBN not provided');
             return;
@@ -53,17 +53,16 @@ module.exports = (app) => {
         handleBookEdit(req, res, req.query.isbn);
     });
 
-
-
+//fonction de la route 'Edit Book'
     async function handleBookEdit(req, res, isbn) {
         try {
             const db = getDb('A17');
             const collection = db.collection('Books');
 
-            // Find the book by ISBN (assuming ISBN is unique)
+            // Trouver livre par  ISBN (is le ISBN est unique)
             const book = await collection.findOne({ ean_isbn13: Number(isbn) });
 
-            //test
+            //logging pour debug
             console.log(`Looking for book with ISBN: ${isbn}`);
             const booktest = await collection.findOne({ ean_isbn13: Number(isbn) });
             console.log(booktest);
@@ -80,19 +79,17 @@ module.exports = (app) => {
         }
     }
 
-
-
-// Route to update book data
+// Route pour le 'update book'
     app.post('/update-book', async (req, res) => {
         try {
-            //logging for debug entry into the code of this post
+            //logging pour debug
             console.log('Enter /update-book route');
             console.log('Request body:', req.body);
 
             const db = getDb('A17');
             const collection = db.collection('Books');
 
-            // Get updated book data from the form submission
+            // données pour le formulaire
             const updatedBookData = {
                 title: req.body.title,
                 creators: req.body.creators,
@@ -105,13 +102,13 @@ module.exports = (app) => {
                 length: parseInt(req.body.length, 10),
             };
 
-            // Update the book in the database based on ISBN
+            // mise à jour sur la base du ISBN
             const isbn = req.body.isbn;
             await collection.updateOne({ ean_isbn13: Number(isbn) }, { $set: updatedBookData });
 
-            res.redirect('/books-catalog'); // Redirect to the book catalog after updating
+            res.redirect('/books-catalog'); // Rediriger vers le 'book catalog' après le update
 
-            //logging for debug exit from the code of this post
+            //logging pour debug
             console.log('Exit /update-book route');
         } catch (error) {
             console.error(error);
@@ -120,7 +117,7 @@ module.exports = (app) => {
     });
 
 
-// Serve the 'delete-isbn' view
+// Route pour la vue 'delete-isbn'
     app.get('/delete-isbn', (req, res) => {
         res.render('delete-isbn');
     });
@@ -133,7 +130,7 @@ module.exports = (app) => {
             const isbn = req.body.isbn;
             await collection.deleteOne({ ean_isbn13: Number(isbn) });
 
-            res.redirect('/books-catalog');  // Redirect to the book catalog after deletion
+            res.redirect('/books-catalog');  // Rediriger vers le 'book catalog' après delete
 
         } catch (error) {
             console.error(error);
@@ -142,8 +139,9 @@ module.exports = (app) => {
     });
 
 
+// Route pour la vue 'create-book'
     app.get('/create-book', (req, res) => {
-        res.render('create-book'); // Render the 'create-book.hbs' view when this endpoint is accessed
+        res.render('create-book');
     });
 
     app.post('/create-book', async (req, res) => {
@@ -154,7 +152,7 @@ module.exports = (app) => {
             const db = getDb('A17');
             const collection = db.collection('Books');
 
-            // Get book data from the form submission
+            // Données du formulaire
             const newBookData = {
                 ean_isbn13: Number(req.body.isbn),
                 title: req.body.title,
@@ -168,17 +166,17 @@ module.exports = (app) => {
                 length: parseInt(req.body.length, 10),
             };
 
-            // Check if ISBN already exists
+            // Vérifier si le ISBN existe déjà
             const existingBook = await collection.findOne({ ean_isbn13: newBookData.ean_isbn13 });
 
             if (existingBook) {
-                // If the book with the given ISBN already exists, redirect with an error message (or handle as desired)
+                //  Si le ISBN existe déjà afficher message d'erreur
                 res.redirect('/create-book?error=ISBN already exists');
             } else {
-                // Insert the new book data into the database
+                // Insertion dans la BD
                 await collection.insertOne(newBookData);
 
-                res.redirect('/books-catalog'); // Redirect to the book catalog after inserting
+                res.redirect('/books-catalog'); // Rediriger vers le 'book catalog' après le insert
             }
 
             console.log('Exit /create-book route');
@@ -188,7 +186,7 @@ module.exports = (app) => {
         }
     });
 
-// Route to display the Edit ISBN form
+// Route to pour la vue du 'Edit ISBN'
     app.get('/edit-isbn', (req, res) => {
         res.render('edit-isbn');
     });

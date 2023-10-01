@@ -144,6 +144,44 @@ module.exports = (app) => {
         res.render('create-book');
     });
 
+    const axios = require('axios');
+
+    app.post('/create-book', async (req, res) => {
+        try {
+            console.log('Enter /create-book route');
+            console.log('Request body:', req.body);
+
+            const newBookData = {
+                ean_isbn13: Number(req.body.isbn),
+                title: req.body.title,
+                creators: req.body.creators,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                description: req.body.description,
+                publisher: req.body.publisher,
+                publishDate: req.body.publishDate,
+                price: parseFloat(req.body.price),
+                length: parseInt(req.body.length, 10),
+            };
+
+            // Send the data to Flask API
+            const response = await axios.post(`${PROXY_API_URL}/books`, newBookData);
+
+            // Assuming the Flask API will return a JSON response indicating success or error
+            if (response.data.error) {
+                res.redirect('/create-book?error=' + encodeURIComponent(response.data.error));
+            } else {
+                res.redirect('/books-catalog'); // Redirect to 'book catalog' after insertion
+            }
+
+            console.log('Exit /create-book route');
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    /*
     app.post('/create-book', async (req, res) => {
         try {
             console.log('Enter /create-book route');
@@ -184,7 +222,7 @@ module.exports = (app) => {
             console.error(error);
             res.status(500).json({ error: 'Internal server error' });
         }
-    });
+    }); */
 
 // Route to pour la vue du 'Edit ISBN'
     app.get('/edit-isbn', (req, res) => {

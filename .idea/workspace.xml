@@ -71,7 +71,7 @@
       <workItem from="1695432275930" duration="3000" />
       <workItem from="1696004899283" duration="1506000" />
       <workItem from="1696006478738" duration="1812000" />
-      <workItem from="1696110461096" duration="3574000" />
+      <workItem from="1696110461096" duration="7448000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <option name="closed" value="true" />
@@ -137,7 +137,15 @@
       <option name="project" value="LOCAL" />
       <updated>1696007336371</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Routing for the books creation now uses a REST API instead of a direct access to the database">
+      <option name="closed" value="true" />
+      <created>1696170853291</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1696170853291</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bd6b0179-e776-4f8c-947a-c3aa7ad8bac2" name="Changes" comment="Routing for the books creation now uses a REST API instead of a direct access to the database">
+    <list default="true" id="bd6b0179-e776-4f8c-947a-c3aa7ad8bac2" name="Changes" comment="All the routes are now using a REST API">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes.js" afterDir="false" />
     </list>
@@ -71,7 +71,8 @@
       <workItem from="1695432275930" duration="3000" />
       <workItem from="1696004899283" duration="1506000" />
       <workItem from="1696006478738" duration="1812000" />
-      <workItem from="1696110461096" duration="7448000" />
+      <workItem from="1696110461096" duration="8461000" />
+      <workItem from="1696729618972" duration="2145000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <option name="closed" value="true" />
@@ -145,7 +146,23 @@
       <option name="project" value="LOCAL" />
       <updated>1696170853291</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="All the routes are now using a REST API">
+      <option name="closed" value="true" />
+      <created>1696175281463</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1696175281463</updated>
+    </task>
+    <task id="LOCAL-00011" summary="All the routes are now using a REST API">
+      <option name="closed" value="true" />
+      <created>1696175291260</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1696175291260</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,6 +187,7 @@
     <MESSAGE value="Moved routing to a separate routes.js file" />
     <MESSAGE value="Routing for the books catalog now uses a REST API instead of a direct access to the database" />
     <MESSAGE value="Routing for the books creation now uses a REST API instead of a direct access to the database" />
-    <option name="LAST_COMMIT_MESSAGE" value="Routing for the books creation now uses a REST API instead of a direct access to the database" />
+    <MESSAGE value="All the routes are now using a REST API" />
+    <option name="LAST_COMMIT_MESSAGE" value="All the routes are now using a REST API" />
   </component>
 </project>
